@@ -59,6 +59,26 @@ session
     nodeArray = [JSON.parse(nodeJson)];
     console.log("#######   "+ nodeArray[0].id);
     nodeArray[0].id = result.records[i]._fields[0].identity.low;
+    nodeArray[0].shape = "icon";
+    switch (nodeArray[0].typeNode) {   
+      case 'person':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0c0"};
+        break;
+      case 'software':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac"};
+        break;
+      case 'database':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf1c0"};
+       break;
+      case 'flux':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf085"};
+      break;
+      case 'flux':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf108"};
+      break;
+      default:
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac"};
+    }
     console.log("#######   "+ JSON.stringify(nodeArray));
     nodes.push(nodeArray[0]);
     console.log(nodes.length);
@@ -150,7 +170,95 @@ app.post('/save',urlencodedParser, (req, res) => {
   const click = {clickTime: new Date()};
   console.log(req.body);
   console.log("||||||       "+JSON.stringify(req.body));
-  res.sendStatus(201);
+  //console.log("test1");
+  var nodesJSON = JSON.parse(JSON.stringify(req.body.nodes));
+  var edgesJSON = JSON.parse(JSON.stringify(req.body.edges));
+  //console.log(monJson._data["29"]);
+  var tx = session.beginTransaction();
+
+  try {
+    console.log("|||||||||||   Avant delete");
+    var txSuppr =  
+    tx.run('MATCH (n) OPTIONAL MATCH (n)-[r]-() DELETE n,r')
+        .catch((err) => {
+            throw 'Problem in first query. ' + err
+        })
+      }
+      catch (e) {
+        tx.rollback()
+        throw 'someQuery# ' + e
+    }
+  for(var key in nodesJSON._data)
+  {
+    console.log(key + ' = ' + nodesJSON._data[key]);
+    var properties = nodesJSON._data[key];
+    var icon ="";
+    console.log(properties["label"]);
+    // creation du noeuds dans nodejs
+    console.log("|||||||||||   Debut enregistrement");
+    if (properties["icon"])  {  icon = properties["icon"].code ;}
+
+      console.log("############## "+icon);
+     try {
+         const props = {
+             name: properties["label"],
+             key : key ,
+             domaine : properties["domaine"],
+             icon : icon,
+             typeNode : properties["typeNode"]
+         }
+         
+         var tx2 =  tx
+             .run('CREATE (a:Application { name: $props.name, type : \'Application\', \
+             label: $props.name, key:$props.key, domaine: $props.domaine , icon: $props.icon, typeNode: $props.typeNode})' 
+             , { props })
+             .catch((err) => {
+                 throw 'Problem in second query. ' + e
+             })
+
+         
+     } catch (e) {
+         tx.rollback()
+         throw 'someQuery# ' + e
+     }
+    }
+
+// chargement des liens 
+console.log("chargement des liens");
+
+for(var key in edgesJSON._data)
+  {
+    console.log(key + ' = ' + edgesJSON._data[key]);
+    var properties = edgesJSON._data[key];
+    console.log(properties["label"]);
+  
+    try {
+      const props = {
+          name: properties["label"],
+          to: properties["to"],
+          from: properties["from"]
+      }
+      
+      var tx3 =  tx
+      .run('MATCH (u:Application {key: \''+props.from+'\' }), (r:Application { key: \''+props.to+'\' })  \
+      CREATE (u)-[:'+props.name+']->(r)')
+      .catch((err) => {
+          throw 'Problem in third query. ' + err
+      })
+
+      
+  } catch (e) {
+      tx.rollback()
+      throw 'someQuery# ' + e
+  }
+
+
+         
+    }
+
+    tx.commit()
+    res.status(200).send({ contenu: 'mon message' });
+ 
   
 });
 

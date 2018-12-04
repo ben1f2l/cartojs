@@ -40,9 +40,6 @@
 
      #tooltip {
       display:none;
-      position:absolute;
-      top:350px;
-      left:170px;
       z-index:299;
       width:250px;
       height:240px;
@@ -52,6 +49,7 @@
       border-color: #5394ed;
       padding:10px;
       text-align: center;
+      
     }
 
     #node-popUp {
@@ -84,6 +82,29 @@
       padding:10px;
       text-align: center;
     }
+   
+#main {
+display:table;
+margin:auto;
+}
+
+#menu  {
+display:table-cell;
+width:240px;
+}
+
+#menu_interne  {
+display:table;
+width:230px;
+}
+
+#mynetwork {
+display:table-cell;
+}
+
+#listButton {
+  display: table-cell;  
+}
   </style>
   <script type="text/javascript" src="/js/exampleUtil.js"></script>
   <script type="text/javascript" src="/js/dist/vis.js"></script>
@@ -157,7 +178,9 @@
             }
 
             function getNodeById(data, id) {
+              console.log(data.length);
                 for (var n = 0; n < data.length; n++) {
+                    
                     if (data[n].id == id) {  // double equals since id can be numeric or string
                       return data[n];
                     }
@@ -329,7 +352,22 @@ function showPopup(data)
     function editNode(data, cancelAction, callback) {
       document.getElementById('node-label').value = data.label;
       document.getElementById('node-domaine').value = data.domaine;
+      if (typeof data.color != 'undefined')
+      {
+        document.getElementById('node-color').value = data.color.background;
+      }
+      
       document.getElementById('node-id').value = data.id;
+      e = document.getElementById('node-icon'); 
+      var i = 0;
+      var ivalue=0;
+      while (i<e.options.length)
+      { 
+        if (e.options[i].text==data.typeNode)
+        ivalue = i;
+        i++;
+      }
+      e.selectedIndex = ivalue;
       document.getElementById('node-saveButton').onclick = saveNodeData.bind(this, data, callback);
       document.getElementById('node-cancelButton').onclick = cancelAction.bind(this, callback);
       document.getElementById('node-popUp').style.display = 'block';
@@ -350,35 +388,40 @@ function showPopup(data)
     function saveNodeData(data, callback) {
       data.label = document.getElementById('node-label').value;
       data.domaine = document.getElementById('node-domaine').value;
-    data.shape = "icon";
-    e = document.getElementById('node-icon'); 
-    switch (e.options[e.selectedIndex].text) {   
-      case 'person':
-        data.icon = {face: 'FontAwesome', code: '\uf0c0'};
-        data.typeNode = "person";
-        break;
-      case 'software':
-        data.icon = {face: 'FontAwesome', code: '\uf0ac'};
-        data.typeNode = "software";
-        break;
-      case 'database':
-        data.icon = {face: 'FontAwesome', code: '\uf1c0'};
-        data.typeNode = "database";
-       break;
-      case 'flux':
-        data.icon = {face: 'FontAwesome', code: '\uf085'};
-        data.typeNode = "flux";
-      break;
-      case 'application':
-        data.icon = {face: 'FontAwesome', code: '\uf108'};
-        data.typeNode = "application";
-      break;
-      default:
-        data.typeNode = "default";
-    }
+      data.color = document.getElementById('node-color').value;
+      data.shape = "icon";
+      e = document.getElementById('node-icon'); 
+      switch (e.options[e.selectedIndex].text) {   
+        case 'person':
+          data.icon = {face: 'FontAwesome', code: '\uf0c0', color:data.color};
+          data.typeNode = "person";
+          break;
+        case 'SI externe':
+          data.icon = {face: 'FontAwesome', code: '\uf1ad', color:data.color};
+          data.typeNode = "SI externe";
+          break;
+        case 'software':
+          data.icon = {face: 'FontAwesome', code: '\uf0ac', color:data.color};
+          data.typeNode = "software";
+          break;
+        case 'database':
+          data.icon = {face: 'FontAwesome', code: '\uf1c0', color:data.color};
+          data.typeNode = "database";
+          break;
+        case 'flux':
+          data.icon = {face: 'FontAwesome', code: '\uf085', color:data.color};
+          data.typeNode = "flux";
+          break;
+        case 'application':
+          data.icon = {face: 'FontAwesome', code: '\uf108', color:data.color};
+          data.typeNode = "application";
+          break;
+        default:
+          data.typeNode = "default";
+      }
       clearNodePopUp();
       callback(data);
-	  refreshLabel();
+	    refreshLabel();
     }
   
 
@@ -425,12 +468,13 @@ function showPopup(data)
 	
 	
 	function clusterByCid() {
-    
+      var domaine = getNodeById(data.nodes,network.getSelectedNodes()[0]).domaine;
       var clusterOptionsByData = {
           joinCondition:function(childOptions) {
-              return childOptions.domaine == "finance";
+              
+              return childOptions.domaine == domaine;
           },
-          clusterNodeProperties: {id:'cidCluster', borderWidth:3, shape:'database'}
+          clusterNodeProperties: {id:'cidCluster', borderWidth:3, shape:'database', name: domaine, label: domaine}
       };
       network.cluster(clusterOptionsByData);
 	}
@@ -460,7 +504,7 @@ function showPopup(data)
 
 <i class="fa fa-flag" ></i>
 
-<div id="tooltip"><span id='contenu'></span></div>
+
 
 
 <div id="node-popUp">
@@ -476,6 +520,9 @@ function showPopup(data)
       <td>domaine</td><td><input id="node-domaine" value="" /></td>
     </tr>
     <tr>
+      <td>color</td><td><input id="node-color" value="" /></td>
+    </tr>
+    <tr>
       <td>icon</td><td>
         <select id="node-icon">
             <option>person</option>
@@ -483,6 +530,7 @@ function showPopup(data)
             <option>database</option>
             <option>flux</option>
             <option>application</option>
+            <option>SI externe</option>
          </select>
       </td>
     </tr>
@@ -500,19 +548,30 @@ function showPopup(data)
   <input type="button" value="save" id="edge-saveButton" />
   <input type="button" value="cancel" id="edge-cancelButton" />
 </div>
-
-<br />
-<div id="mynetwork"></div>
-          <div>
-            <input type="button" id="myButton" value="save" onclick="save()"></input>
-            <input type="button" id="HButton" value="save dynamique"></input>
-            <input type="button" onclick="clusterByCid()" value="Regrouper par domaine"> <br />
-            <input type="button" onclick="setPhysics()" value="restore physics"> <br />
-            <input type="button" onclick="disablePhysics()" value="disable physics"> <br />
-        </div>
-
-
-        <script>
+<table>
+  <tr>
+    <td>
+        <div id="mynetwork"></div>
+</td>
+<td>
+        <table>     
+          <tr>
+            <td> 
+           <div id="listButton">
+                    <input type="button" id="myButton" value="save" onclick="save()"></input><br/>
+                    <input type="button" onclick="clusterByCid()" value="Regrouper par domaine"> </input><br/>
+                    <input type="button" onclick="setPhysics()" value="restore physics"> </input><br/>
+                    <input type="button" onclick="disablePhysics()" value="disable physics"> </input><br/>
+                  </div>
+                </td></tr>   
+                <tr><td height='300px'>
+                  <div id="tooltip"><span id='contenu'></span></div>
+</td></tr>
+                </table>
+  </td>
+  </tr>
+</table>
+         <script>
           /*
             $(document).ready(function () {
                 var my_div = $("#holder");

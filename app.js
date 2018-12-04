@@ -60,24 +60,28 @@ session
     console.log("#######   "+ nodeArray[0].id);
     nodeArray[0].id = result.records[i]._fields[0].identity.low;
     nodeArray[0].shape = "icon";
+    console.log(nodeArray[0].color);
     switch (nodeArray[0].typeNode) {   
       case 'person':
-        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0c0"};
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0c0", color:nodeArray[0].color};
         break;
       case 'software':
-        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac"};
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac", color:nodeArray[0].color};
         break;
       case 'database':
-        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf1c0"};
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf1c0", color:nodeArray[0].color};
        break;
       case 'flux':
-        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf085"};
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf085", color:nodeArray[0].color};
       break;
-      case 'flux':
-        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf108"};
+      case 'application':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf108", color:nodeArray[0].color};
+      break;
+      case 'SI externe':
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf1ad", color:nodeArray[0].color};
       break;
       default:
-        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac"};
+        nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac", color:nodeArray[0].color};
     }
     console.log("#######   "+ JSON.stringify(nodeArray));
     nodes.push(nodeArray[0]);
@@ -109,7 +113,13 @@ session
     fromId = result.records[i].get(0).start.low;
     toId = result.records[i].get(0).end.low;
     type = result.records[i].get(0).type;
-    edges.push({from : fromId, to: toId, label:type})
+    if (type != "DEFAULT")
+    { edges.push({from : fromId, to: toId, label:type})
+    }
+    else
+    {
+      edges.push({from : fromId, to: toId})
+    }
   }
   return(callback(null,edges));
  
@@ -205,12 +215,13 @@ app.post('/save',urlencodedParser, (req, res) => {
              key : key ,
              domaine : properties["domaine"],
              icon : icon,
-             typeNode : properties["typeNode"]
+             typeNode : properties["typeNode"],
+             color : properties["color"]
          }
          
          var tx2 =  tx
              .run('CREATE (a:Application { name: $props.name, type : \'Application\', \
-             label: $props.name, key:$props.key, domaine: $props.domaine , icon: $props.icon, typeNode: $props.typeNode})' 
+             label: $props.name, key:$props.key, domaine: $props.domaine , icon: $props.icon, typeNode: $props.typeNode, color: $props.color})' 
              , { props })
              .catch((err) => {
                  throw 'Problem in second query. ' + e
@@ -228,23 +239,35 @@ console.log("chargement des liens");
 
 for(var key in edgesJSON._data)
   {
-    console.log(key + ' = ' + edgesJSON._data[key]);
+    //console.log(key + ' = ' + edgesJSON._data[key]);
     var properties = edgesJSON._data[key];
-    console.log(properties["label"]);
+    console.log('@@@@@@@@@@     '+properties["label"]);
   
     try {
       const props = {
           name: properties["label"],
           to: properties["to"],
           from: properties["from"]
-      }
+    }
+    console.log("apres les propriétés");
+    var strQuery = "";
+    if (properties["label"] == "" || properties["label"] == undefined)
+    { 
       
-      var tx3 =  tx
-      .run('MATCH (u:Application {key: \''+props.from+'\' }), (r:Application { key: \''+props.to+'\' })  \
-      CREATE (u)-[:'+props.name+']->(r)')
-      .catch((err) => {
-          throw 'Problem in third query. ' + err
-      })
+      strQuery = 'MATCH (u:Application {key: \''+props.from+'\' }), (r:Application { key: \''+props.to+'\' })  \
+    CREATE (u)-[:DEFAULT]->(r)';
+    }
+    else
+    { strQuery = 'MATCH (u:Application {key: \''+props.from+'\' }), (r:Application { key: \''+props.to+'\' })  \
+    CREATE (u)-[:'+props.name+']->(r)';
+    }
+
+    console.log(strQuery);
+    var tx3 =  tx
+    .run(strQuery)
+    .catch((err) => {
+        throw 'Problem in third query. ' + err
+    })
 
       
   } catch (e) {

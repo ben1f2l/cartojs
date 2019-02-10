@@ -51,8 +51,8 @@ session
 .then(function(result) {
   console.log("récupération des nodes");
   for(var i= 0; i < result.records.length; i++)
-  { console.log("#######   "+JSON.stringify(result.records[i]._fields[0].properties));
-    console.log("|||||||||||||||||||     "+result.records[i]._fields[0].identity);
+  { //console.log("#######   "+JSON.stringify(result.records[i]._fields[0].properties));
+    //console.log("|||||||||||||||||||     "+result.records[i]._fields[0].identity);
     var nodeJson = JSON.stringify(result.records[i]._fields[0].properties);
     var nodeArray = [];
     console.log("#######   "+ nodeJson);
@@ -83,10 +83,11 @@ session
       default:
         nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac", color:nodeArray[0].color};
     }
-    console.log("#######   "+ JSON.stringify(nodeArray));
+    //console.log("#######   "+ JSON.stringify(nodeArray));
     nodes.push(nodeArray[0]);
     console.log(nodes.length);
   }
+  console.log("nnnnnnnn   "+JSON.stringify(nodes));
   return(callback(null,nodes));
  
   })
@@ -108,19 +109,24 @@ session
   var fromId = "";
   var toId = "";
   var type ="";
+  var commentaire="";
   for(var i= 0; i < result.records.length; i++)
   { //edges.push(result.records[i]._fields[0].properties);
     fromId = result.records[i].get(0).start.low;
     toId = result.records[i].get(0).end.low;
     type = result.records[i].get(0).type;
+   
+    commentaire = typeof result.records[i].get(0).properties.comment !== "undefined" ? result.records[i].get(0).properties.comment : "";
+    console.log("!!!!!!!!!!!!!!!   "+commentaire)
     if (type != "DEFAULT")
-    { edges.push({from : fromId, to: toId, label:type})
+    { edges.push({from : fromId, to: toId, label:type, comment: commentaire})
     }
     else
     {
-      edges.push({from : fromId, to: toId})
+      edges.push({from : fromId, to: toId, comment:"", type:""})
     }
   }
+  console.log("eeeeeeeeeeeee   "+JSON.stringify(edges));
   return(callback(null,edges));
  
   })
@@ -200,15 +206,12 @@ app.post('/save',urlencodedParser, (req, res) => {
     }
   for(var key in nodesJSON._data)
   {
-    console.log(key + ' = ' + nodesJSON._data[key]);
     var properties = nodesJSON._data[key];
     var icon ="";
-    console.log(properties["label"]);
     // creation du noeuds dans nodejs
     console.log("|||||||||||   Debut enregistrement");
     if (properties["icon"])  {  icon = properties["icon"].code ;}
 
-      console.log("############## "+icon);
      try {
          const props = {
              name: properties["label"],
@@ -216,12 +219,13 @@ app.post('/save',urlencodedParser, (req, res) => {
              domaine : properties["domaine"],
              icon : icon,
              typeNode : properties["typeNode"],
-             color : properties["color"]
+             color : properties["color"],
+             comment: properties["comment"]
          }
          
          var tx2 =  tx
              .run('CREATE (a:Application { name: $props.name, type : \'Application\', \
-             label: $props.name, key:$props.key, domaine: $props.domaine , icon: $props.icon, typeNode: $props.typeNode, color: $props.color})' 
+             label: $props.name, key:$props.key, domaine: $props.domaine , icon: $props.icon, typeNode: $props.typeNode, color: $props.color, comment:  $props.comment})' 
              , { props })
              .catch((err) => {
                  throw 'Problem in second query. ' + e
@@ -239,15 +243,14 @@ console.log("chargement des liens");
 
 for(var key in edgesJSON._data)
   {
-    //console.log(key + ' = ' + edgesJSON._data[key]);
     var properties = edgesJSON._data[key];
     console.log('@@@@@@@@@@     '+properties["label"]);
-  
     try {
       const props = {
           name: properties["label"],
           to: properties["to"],
-          from: properties["from"]
+          from: properties["from"],
+          comment: properties["comment"]
     }
     console.log("apres les propriétés");
     var strQuery = "";
@@ -259,7 +262,7 @@ for(var key in edgesJSON._data)
     }
     else
     { strQuery = 'MATCH (u:Application {key: \''+props.from+'\' }), (r:Application { key: \''+props.to+'\' })  \
-    CREATE (u)-[:'+props.name+']->(r)';
+    CREATE (u)-[:'+props.name+' {comment: \''+props.comment+'\'}]->(r)';
     }
 
     console.log(strQuery);

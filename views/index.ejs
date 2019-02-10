@@ -9,39 +9,17 @@
       font: 10pt sans;
     }
     #mynetwork {
-      position:relative;
-      width: 800px;
-      height: 600px;
+      position:absolute;
+      width: calc(85%);
       border: 1px solid lightgray;
-    }
-    table.legend_table {
-      font-size: 11px;
-      border-width:1px;
-      border-color:#d3d3d3;
-      border-style:solid;
-    }
-    table.legend_table,td {
-      border-width:1px;
-      border-color:#d3d3d3;
-      border-style:solid;
-      padding: 2px;
-    }
-    div.table_content {
-      width:80px;
-      text-align:center;
-    }
-    div.table_description {
-      width:100px;
-    }
-
-    #operation {
-      font-size:28px;
+      height: 100% ;                         
+      height: calc(100% - 150px);      
     }
 
      #tooltip {
       display:none;
       z-index:299;
-      width:250px;
+      width:85%;
       height:240px;
       background-color: #f9f9f9;
       border-style:solid;
@@ -49,7 +27,6 @@
       border-color: #5394ed;
       padding:10px;
       text-align: center;
-      
     }
 
     #node-popUp {
@@ -89,22 +66,13 @@ margin:auto;
 }
 
 #menu  {
-display:table-cell;
-width:240px;
+position: absolute;
+right:0px;
+margin:2px;
+width:calc(12%);
 }
 
-#menu_interne  {
-display:table;
-width:230px;
-}
 
-#mynetwork {
-display:table-cell;
-}
-
-#listButton {
-  display: table-cell;  
-}
   </style>
   <script type="text/javascript" src="/js/exampleUtil.js"></script>
   <script type="text/javascript" src="/js/dist/vis.js"></script>
@@ -114,15 +82,9 @@ display:table-cell;
     var nodes = null;
     var edges = null;
     var network = null;
-    // randomly create some nodes and edges
-    //var data = getScaleFreeNetwork(10);
-    //alert(data);
-    //alert(<%=listeNoeuds%>);
-
-//alert(JSON.stringify(getScaleFreeNetwork(10)));
-
 
     data = {nodes:<%-listeNoeuds%>, edges:<%-listeEdge%>};
+    
     var seed = 2;
 
     var exportArea;
@@ -178,7 +140,6 @@ display:table-cell;
             }
 
             function getNodeById(data, id) {
-              console.log(data.length);
                 for (var n = 0; n < data.length; n++) {
                     
                     if (data[n].id == id) {  // double equals since id can be numeric or string
@@ -187,6 +148,19 @@ display:table-cell;
                 };
 
                 throw 'Can not find id \'' + id + '\' in data';
+            }
+
+
+            function getEdgeById(data, id) {
+              alert(id);
+                for (var n = 0; n < data.length; n++) {
+                    
+                    if (data[n].id == id) {  // double equals since id can be numeric or string
+                      return data[n];
+                    }
+                };
+
+                throw 'Can not find edge with id \'' + id + '\' in data';
             }
 
             function getEdgeData(data) {
@@ -268,7 +242,12 @@ const button = document.getElementById('myButton');
         "edges": {
           "smooth": {
             "forceDirection": "none",
-            "roundness": 0.4
+            "roundness": 0.1
+          },
+          arrows: {
+            to:     {enabled: true, scaleFactor:1, type:'arrow'},
+            middle: {enabled: false, scaleFactor:1, type:'arrow'},
+            from:   {enabled: false, scaleFactor:1, type:'arrow'}
           }
         },
         "interaction": {
@@ -330,6 +309,13 @@ const button = document.getElementById('myButton');
       network.on("hoverNode", function (params) {
         showPopup(params);
     });
+
+    network.on("hoverEdge", function (params) {
+        showPopupEdge(params);
+    });
+    network.on("blurEdge", function (params) {
+        hidePopupEdge(params);
+    });
     network.on("blurNode", function (params) {
         hidePopup(params);
     });	  
@@ -345,13 +331,30 @@ function showPopup(data)
 {   
     var selectedNode = network.body.nodes[data.node];
     console.log(selectedNode.options.label);
-    document.getElementById('contenu').innerHTML = selectedNode.options.label + " " + selectedNode.options.domaine;
+    document.getElementById('contenu').innerHTML = selectedNode.options.label + "<br/>domaine : " + selectedNode.options.domaine + "<br/><br/>commentaire : "+selectedNode.options.comment;
     document.getElementById('tooltip').style.display = 'block';
 }
+
+function hidePopupEdge(data)
+{   
+    document.getElementById('tooltip').style.display = 'none';
+}
+
+function showPopupEdge(data)
+{   var selectedEdge = network.body.edges[data.edge];
+    //alert(data.edge);
+    
+    var edge = network.body.data.edges._data[data.edge];
+    //alert(edge.comment);
+    document.getElementById('contenu').innerHTML = selectedEdge.options.label + "<br/><br/>commentaire : "+edge.comment;
+    document.getElementById('tooltip').style.display = 'block';
+}
+
 
     function editNode(data, cancelAction, callback) {
       document.getElementById('node-label').value = data.label;
       document.getElementById('node-domaine').value = data.domaine;
+      document.getElementById('node-comment').value = data.comment;
       if (typeof data.color != 'undefined')
       {
         document.getElementById('node-color').value = data.color.background;
@@ -389,6 +392,7 @@ function showPopup(data)
       data.label = document.getElementById('node-label').value;
       data.domaine = document.getElementById('node-domaine').value;
       data.color = document.getElementById('node-color').value;
+      data.comment = document.getElementById('node-comment').value;
       data.shape = "icon";
       e = document.getElementById('node-icon'); 
       switch (e.options[e.selectedIndex].text) {   
@@ -421,7 +425,7 @@ function showPopup(data)
       }
       clearNodePopUp();
       callback(data);
-	    refreshLabel();
+	    //refreshLabel();
     }
   
 
@@ -432,9 +436,15 @@ function showPopup(data)
 
     function editEdgeWithoutDrag(data, callback) {
       // filling in the popup DOM elements
+      
+      var edge = network.body.data.edges._data[data.id];
       document.getElementById('edge-label').value = data.label;
       document.getElementById('edge-saveButton').onclick = saveEdgeData.bind(this, data, callback);
       document.getElementById('edge-cancelButton').onclick = cancelEdgeEdit.bind(this,callback);
+      if (edge)
+      { 
+        document.getElementById('edge-comment').value = edge.comment;
+      }
       document.getElementById('edge-popUp').style.display = 'block';
     }
 
@@ -455,15 +465,21 @@ function showPopup(data)
       if (typeof data.from === 'object')
         data.from = data.from.id
       data.label = document.getElementById('edge-label').value;
+      data.comment = document.getElementById('edge-comment').value
       clearEdgePopUp();
       callback(data);
     }
 
     function init() {
-	                exportArea = document.getElementById('input_output');
-                importButton = document.getElementById('import_button');
-                exportButton = document.getElementById('export_button');
       draw();
+    }
+
+    function listeDomaine() {
+      var arrayNode = network.body.data.nodes._data;
+      console.log(arrayNode);
+      for (key in arrayNode) {
+        alert(arrayNode[key].domaine);
+      }
     }
 	
 	
@@ -498,13 +514,12 @@ function showPopup(data)
 </head>
 
 <body onload="init();">
-<h2>Editing the nodes and edges-without-drag (localized)</h2>
+<h2>Cartographie applicative</h2>
+
+
+
 <div id="holder">
 	</div>
-
-<i class="fa fa-flag" ></i>
-
-
 
 
 <div id="node-popUp">
@@ -534,6 +549,9 @@ function showPopup(data)
          </select>
       </td>
     </tr>
+    <tr>
+      <td>commentaire</td><td><textarea rows="2" cols="20" id="node-comment" ></textarea></td>
+    </tr>
   </table>
   <input type="button" value="save" id="node-saveButton" />
   <input type="button" value="cancel" id="node-cancelButton" />
@@ -544,52 +562,38 @@ function showPopup(data)
   <table style="margin:auto;">
     <tr>
       <td>label</td><td><input id="edge-label" value="new value" /></td>
-    </tr></table>
+    </tr>
+    <tr>
+      <td>commentaire</td><td><textarea rows="2" cols="20" id="edge-comment" ></textarea></td>
+    </tr>
+  </table>
   <input type="button" value="save" id="edge-saveButton" />
   <input type="button" value="cancel" id="edge-cancelButton" />
 </div>
-<table>
-  <tr>
-    <td>
-        <div id="mynetwork"></div>
-</td>
-<td>
-        <table>     
-          <tr>
-            <td> 
-           <div id="listButton">
-                    <input type="button" id="myButton" value="save" onclick="save()"></input><br/>
-                    <input type="button" onclick="clusterByCid()" value="Regrouper par domaine"> </input><br/>
-                    <input type="button" onclick="setPhysics()" value="restore physics"> </input><br/>
-                    <input type="button" onclick="disablePhysics()" value="disable physics"> </input><br/>
-                  </div>
-                </td></tr>   
-                <tr><td height='300px'>
-                  <div id="tooltip"><span id='contenu'></span></div>
-</td></tr>
-                </table>
-  </td>
-  </tr>
-</table>
-         <script>
-          /*
-            $(document).ready(function () {
-                var my_div = $("#holder");
-                $("#HButton").on("click", function () {
-        
-                  $.ajax({
-                     url: "/save"
-
-                  })
-                  .done(function( data ) {
-                     console.log( "Sample of data:", data );
-                     $('#holder').html(data.message);
-                  });
-                });
-            });
-            */
-        </script>
 
 
+
+      <div id="mynetwork"></div>
+      <div id="menu">
+      <table>
+        <tr>
+          <td>
+            <div id="listButton">
+              <input type="button" id="myButton" value="save" onclick="save()"></input><br />
+              <input type="button" onclick="clusterByCid()" value="Regrouper par domaine"> </input><br />
+              <input type="button" onclick="setPhysics()" value="restore physics"> </input><br />
+              <input type="button" onclick="disablePhysics()" value="disable physics"> </input><br />
+              <input type="button" onclick="listeDomaine()" value="liste des domaines"> </input><br />
+              
+            </div>
+          </td>
+        </tr>
+        <tr>
+          <td height='300px'>
+            <div id="tooltip"><span id='contenu'></span></div>
+          </td>
+        </tr>
+      </table>
+    </div>
 </body>
 </html>

@@ -1,78 +1,80 @@
 <!doctype html>
 <html>
+
 <head>
-  <meta charset="utf-8"/>
+  <meta charset="utf-8" />
   <title>Cartographie applicative</title>
 
   <style type="text/css">
-    body, select {
+    body,
+    select {
       font: 10pt sans;
     }
+
     #mynetwork {
-      position:absolute;
+      position: absolute;
       width: calc(85%);
       border: 1px solid lightgray;
-      height: 100% ;                         
-      height: calc(100% - 150px);      
+      height: 100%;
+      height: calc(100% - 150px);
     }
 
-     #tooltip {
-      display:none;
-      z-index:299;
-      width:85%;
-      height:240px;
+    #tooltip {
+      display: none;
+      z-index: 299;
+      width: 85%;
+      height: 240px;
       background-color: #f9f9f9;
-      border-style:solid;
-      border-width:3px;
+      border-style: solid;
+      border-width: 3px;
       border-color: #5394ed;
-      padding:10px;
+      padding: 10px;
       text-align: center;
     }
 
     #node-popUp {
-      display:none;
-      position:absolute;
-      top:350px;
-      left:170px;
-      z-index:299;
-      width:250px;
-      height:240px;
+      display: none;
+      position: absolute;
+      top: 350px;
+      left: 170px;
+      z-index: 299;
+      width: 250px;
+      height: 240px;
       background-color: #f9f9f9;
-      border-style:solid;
-      border-width:3px;
+      border-style: solid;
+      border-width: 3px;
       border-color: #5394ed;
-      padding:10px;
+      padding: 10px;
       text-align: center;
     }
+
     #edge-popUp {
-      display:none;
-      position:absolute;
-      top:350px;
-      left:170px;
-      z-index:299;
-      width:250px;
-      height:90px;
+      display: none;
+      position: absolute;
+      top: 350px;
+      left: 170px;
+      z-index: 299;
+      width: 250px;
+      height: 90px;
       background-color: #f9f9f9;
-      border-style:solid;
-      border-width:3px;
+      border-style: solid;
+      border-width: 3px;
       border-color: #5394ed;
-      padding:10px;
+      padding: 10px;
       text-align: center;
     }
-   
-#main {
-display:table;
-margin:auto;
-}
 
-#menu  {
-position: absolute;
-right:0px;
-margin:2px;
-width:calc(12%);
-}
+    #main {
+      display: table;
+      margin: auto;
+    }
 
-
+    #menu {
+      position: absolute;
+      right: 0px;
+      margin: 2px;
+      width: calc(12%);
+    }
   </style>
   <script type="text/javascript" src="/js/exampleUtil.js"></script>
   <script type="text/javascript" src="/js/dist/vis.js"></script>
@@ -82,9 +84,10 @@ width:calc(12%);
     var nodes = null;
     var edges = null;
     var network = null;
+    var domaines = [];
 
-    data = {nodes:<%-listeNoeuds%>, edges:<%-listeEdge%>};
-    
+    data = { nodes:<%-listeNoeuds%>, edges:<%-listeEdge%>};
+
     var seed = 2;
 
     var exportArea;
@@ -97,139 +100,138 @@ width:calc(12%);
         network = null;
       }
     }
-	
-	// sauvegarde
-	
-	function addConnections(elem, index) {
-                // need to replace this with a tree of the network, then get child direct children of the element
-                elem.connections = network.getConnectedNodes(index);
-            }
 
-	
-	            function clearOutputArea() {
-                exportArea.value = "";
-            }
-	
-	           function exportNetwork() {
-                clearOutputArea();
+    // sauvegarde
 
-                //var nodes = objectToArray(network.getPositions());
-				//alert(getNodeById(data.nodes,0).label);
-				alert(network.getData());
-				//network.body.data.nodes._data[2];
-				//var nodes = objectToArray(network);
-
-                //nodes.forEach(addConnections);
-
-                // pretty print node data
-                //var exportValue = JSON.stringify(nodes, undefined, 2);
-
-                //exportArea.value = exportValue;
-
-                //resizeExportArea();
-            }
-
-            function getNodeData(data) {
-                var networkNodes = [];
-
-                data.forEach(function(elem, index, array) {
-                    networkNodes.push({id: elem.id, label: elem.id, autre: elem.label, x: elem.x, y: elem.y});
-                });
-
-                return new vis.DataSet(networkNodes);
-            }
-
-            function getNodeById(data, id) {
-                for (var n = 0; n < data.length; n++) {
-                    
-                    if (data[n].id == id) {  // double equals since id can be numeric or string
-                      return data[n];
-                    }
-                };
-
-                throw 'Can not find id \'' + id + '\' in data';
-            }
+    function addConnections(elem, index) {
+      // need to replace this with a tree of the network, then get child direct children of the element
+      elem.connections = network.getConnectedNodes(index);
+    }
 
 
-            function getEdgeById(data, id) {
-              alert(id);
-                for (var n = 0; n < data.length; n++) {
-                    
-                    if (data[n].id == id) {  // double equals since id can be numeric or string
-                      return data[n];
-                    }
-                };
+    function clearOutputArea() {
+      exportArea.value = "";
+    }
 
-                throw 'Can not find edge with id \'' + id + '\' in data';
-            }
+    function exportNetwork() {
+      clearOutputArea();
 
-            function getEdgeData(data) {
-                var networkEdges = [];
+      //var nodes = objectToArray(network.getPositions());
+      //alert(getNodeById(data.nodes,0).label);
+      alert(network.getData());
+      //network.body.data.nodes._data[2];
+      //var nodes = objectToArray(network);
 
-                data.forEach(function(node) {
-                    // add the connection
-                    node.connections.forEach(function(connId, cIndex, conns) {
-                        networkEdges.push({from: node.id, to: connId});
-                        let cNode = getNodeById(data, connId);
+      //nodes.forEach(addConnections);
 
-                        var elementConnections = cNode.connections;
+      // pretty print node data
+      //var exportValue = JSON.stringify(nodes, undefined, 2);
 
-                        // remove the connection from the other node to prevent duplicate connections
-                        var duplicateIndex = elementConnections.findIndex(function(connection) {
-                          return connection == node.id; // double equals since id can be numeric or string
-                        });
+      //exportArea.value = exportValue;
+
+      //resizeExportArea();
+    }
+
+    function getNodeData(data) {
+      var networkNodes = [];
+
+      data.forEach(function (elem, index, array) {
+        networkNodes.push({ id: elem.id, label: elem.id, autre: elem.label, x: elem.x, y: elem.y });
+      });
+
+      return new vis.DataSet(networkNodes);
+    }
+
+    function getNodeById(data, id) {
+      for (var n = 0; n < data.length; n++) {
+
+        if (data[n].id == id) {  // double equals since id can be numeric or string
+          return data[n];
+        }
+      };
+
+      throw 'Can not find id \'' + id + '\' in data';
+    }
 
 
-                        if (duplicateIndex != -1) {
-                          elementConnections.splice(duplicateIndex, 1);
-                        };
-                  });
-                });
+    function getEdgeById(data, id) {
+      alert(id);
+      for (var n = 0; n < data.length; n++) {
 
-                return new vis.DataSet(networkEdges);
-            }
+        if (data[n].id == id) {  // double equals since id can be numeric or string
+          return data[n];
+        }
+      };
 
-            function objectToArray(obj) {
-                return Object.keys(obj).map(function (key) {
-                  obj[key].id = key;
-					
-                  return obj[key];
-                });
-            }
+      throw 'Can not find edge with id \'' + id + '\' in data';
+    }
 
-            function resizeExportArea() {
-                exportArea.style.height = (1 + exportArea.scrollHeight) + "px";
-            }
-  
-            /////////////////////////////////
+    function getEdgeData(data) {
+      var networkEdges = [];
 
-function updateReponse(body)
-{ 
-  document.getElementById('holder').innerHTML="<b>enregistrement réalisé avec succès </b>"+body.contenu;
-}
+      data.forEach(function (node) {
+        // add the connection
+        node.connections.forEach(function (connId, cIndex, conns) {
+          networkEdges.push({ from: node.id, to: connId });
+          let cNode = getNodeById(data, connId);
 
-function save()
-{
-const button = document.getElementById('myButton');
-  console.log('button was clicked');
-  fetch('/save', {method: 'POST',headers: {
-                "Content-Type": "application/json"
-            } , body: JSON.stringify(network.body.data)})
-    .then(function(response) {
-      if(response.ok) {
-        console.log('Click was recorded');
-        var dataR=response.json().then(body => {updateReponse(body);});
-        return;
-      }
-      else
-      {
-        document.getElementById('holder').innerHTML="<b>enregistrement ko</b>";
-      }
-    })
-    .catch(function(error) {
-      console.log(error);
-    });
-}	
+          var elementConnections = cNode.connections;
+
+          // remove the connection from the other node to prevent duplicate connections
+          var duplicateIndex = elementConnections.findIndex(function (connection) {
+            return connection == node.id; // double equals since id can be numeric or string
+          });
+
+
+          if (duplicateIndex != -1) {
+            elementConnections.splice(duplicateIndex, 1);
+          };
+        });
+      });
+
+      return new vis.DataSet(networkEdges);
+    }
+
+    function objectToArray(obj) {
+      return Object.keys(obj).map(function (key) {
+        obj[key].id = key;
+
+        return obj[key];
+      });
+    }
+
+    function resizeExportArea() {
+      exportArea.style.height = (1 + exportArea.scrollHeight) + "px";
+    }
+
+    /////////////////////////////////
+
+    function updateReponse(body) {
+      document.getElementById('holder').innerHTML = "<b>enregistrement réalisé avec succès </b>" + body.contenu;
+    }
+
+    function save() {
+      const button = document.getElementById('myButton');
+      console.log('button was clicked');
+      fetch('/save', {
+        method: 'POST', headers: {
+          "Content-Type": "application/json"
+        }, body: JSON.stringify(network.body.data)
+      })
+        .then(function (response) {
+          if (response.ok) {
+            console.log('Click was recorded');
+            var dataR = response.json().then(body => { updateReponse(body); });
+            return;
+          }
+          else {
+            document.getElementById('holder').innerHTML = "<b>enregistrement ko</b>";
+          }
+        })
+        .catch(function (error) {
+          console.log(error);
+        });
+    }
 
     function draw() {
       destroy();
@@ -245,9 +247,9 @@ const button = document.getElementById('myButton');
             "roundness": 0.1
           },
           arrows: {
-            to:     {enabled: true, scaleFactor:1, type:'arrow'},
-            middle: {enabled: false, scaleFactor:1, type:'arrow'},
-            from:   {enabled: false, scaleFactor:1, type:'arrow'}
+            to: { enabled: true, scaleFactor: 1, type: 'arrow' },
+            middle: { enabled: false, scaleFactor: 1, type: 'arrow' },
+            from: { enabled: false, scaleFactor: 1, type: 'arrow' }
           }
         },
         "interaction": {
@@ -263,10 +265,10 @@ const button = document.getElementById('myButton');
           },
           "minVelocity": 0.75,
           "timestep": 0.07
-          },
-        layout: {randomSeed:seed}, // just to make sure the layout is the same when the locale is changed
+        },
+        layout: { randomSeed: seed }, // just to make sure the layout is the same when the locale is changed
         locale: "en",
-		    manipulation: {
+        manipulation: {
           addNode: function (data, callback) {
             // filling in the popup DOM elements
             document.getElementById('node-operation').innerHTML = "Add Node";
@@ -289,85 +291,85 @@ const button = document.getElementById('myButton');
             editEdgeWithoutDrag(data, callback);
           },
           editEdge: {
-            editWithoutDrag: function(data, callback) {
+            editWithoutDrag: function (data, callback) {
               document.getElementById('edge-operation').innerHTML = "Edit Edge";
-              editEdgeWithoutDrag(data,callback);
+              editEdgeWithoutDrag(data, callback);
             }
           }
         }
       };
-	  
+
       network = new vis.Network(container, data, options);
-	    network.on("selectNode", function(params) {
+      network.on("selectNode", function (params) {
         if (params.nodes.length == 1) {
-            if (network.isCluster(params.nodes[0]) == true) {
-                network.openCluster(params.nodes[0]);
+          if (network.isCluster(params.nodes[0]) == true) {
+            var domaine  = params.nodes[0].substring(8, params.nodes[0].length);
+            network.openCluster(params.nodes[0]);
+            var index = domaines.indexOf(domaine);
+            if (index > -1) {
+              domaines.splice(index, 1);
             }
+          }
         }
       });
 
       network.on("hoverNode", function (params) {
         showPopup(params);
-    });
+      });
 
-    network.on("hoverEdge", function (params) {
+      network.on("hoverEdge", function (params) {
         showPopupEdge(params);
-    });
-    network.on("blurEdge", function (params) {
+      });
+      network.on("blurEdge", function (params) {
         hidePopupEdge(params);
-    });
-    network.on("blurNode", function (params) {
+      });
+      network.on("blurNode", function (params) {
         hidePopup(params);
-    });	  
-	   
+      });
     }
 
-function hidePopup(data)
-{   
-    document.getElementById('tooltip').style.display = 'none';
-}
-
-function showPopup(data)
-{   
-    var selectedNode = network.body.nodes[data.node];
-    console.log(selectedNode.options.label);
-    document.getElementById('contenu').innerHTML = selectedNode.options.label + "<br/>domaine : " + selectedNode.options.domaine + "<br/><br/>commentaire : "+selectedNode.options.comment;
-    document.getElementById('tooltip').style.display = 'block';
-}
-
-function hidePopupEdge(data)
-{   
-    document.getElementById('tooltip').style.display = 'none';
-}
-
-function showPopupEdge(data)
-{   var selectedEdge = network.body.edges[data.edge];
-    //alert(data.edge);
     
-    var edge = network.body.data.edges._data[data.edge];
-    //alert(edge.comment);
-    document.getElementById('contenu').innerHTML = selectedEdge.options.label + "<br/><br/>commentaire : "+edge.comment;
-    document.getElementById('tooltip').style.display = 'block';
-}
+    function hidePopup(data) {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    function showPopup(data) {
+      var selectedNode = network.body.nodes[data.node];
+      console.log(selectedNode.options.label);
+      document.getElementById('contenu').innerHTML = selectedNode.options.label + "<br/>domaine : " + selectedNode.options.domaine + "<br/><br/>commentaire : " + selectedNode.options.comment;
+      document.getElementById('tooltip').style.display = 'block';
+    }
+
+    function hidePopupEdge(data) {
+      document.getElementById('tooltip').style.display = 'none';
+    }
+
+    function showPopupEdge(data) {
+      var selectedEdge = network.body.edges[data.edge];
+      //alert(data.edge);
+
+      var edge = network.body.data.edges._data[data.edge];
+      //alert(edge.comment);
+      document.getElementById('contenu').innerHTML = selectedEdge.options.label + "<br/><br/>commentaire : " + edge.comment;
+      document.getElementById('tooltip').style.display = 'block';
+    }
 
 
     function editNode(data, cancelAction, callback) {
       document.getElementById('node-label').value = data.label;
       document.getElementById('node-domaine').value = data.domaine;
       document.getElementById('node-comment').value = data.comment;
-      if (typeof data.color != 'undefined')
-      {
+      if (typeof data.color != 'undefined') {
         document.getElementById('node-color').value = data.color.background;
       }
-      
+
       document.getElementById('node-id').value = data.id;
-      e = document.getElementById('node-icon'); 
+      e = document.getElementById('node-icon');
       var i = 0;
-      var ivalue=0;
-      while (i<e.options.length)
-      { 
-        if (e.options[i].text==data.typeNode)
-        ivalue = i;
+      var ivalue = 0;
+      while (i < e.options.length) {
+        if (e.options[i].text == data.typeNode)
+          ivalue = i;
         i++;
       }
       e.selectedIndex = ivalue;
@@ -394,30 +396,42 @@ function showPopupEdge(data)
       data.color = document.getElementById('node-color').value;
       data.comment = document.getElementById('node-comment').value;
       data.shape = "icon";
-      e = document.getElementById('node-icon'); 
-      switch (e.options[e.selectedIndex].text) {   
+      e = document.getElementById('node-icon');
+      switch (e.options[e.selectedIndex].text) {
         case 'person':
-          data.icon = {face: 'FontAwesome', code: '\uf0c0', color:data.color};
+          data.icon = { face: 'FontAwesome', code: '\uf0c0', color: data.color };
           data.typeNode = "person";
           break;
         case 'SI externe':
-          data.icon = {face: 'FontAwesome', code: '\uf1ad', color:data.color};
+          data.icon = { face: 'FontAwesome', code: '\uf1ad', color: data.color };
           data.typeNode = "SI externe";
           break;
         case 'software':
-          data.icon = {face: 'FontAwesome', code: '\uf0ac', color:data.color};
+          data.icon = { face: 'FontAwesome', code: '\uf0ac', color: data.color };
           data.typeNode = "software";
           break;
         case 'database':
-          data.icon = {face: 'FontAwesome', code: '\uf1c0', color:data.color};
+          data.icon = { face: 'FontAwesome', code: '\uf1c0', color: data.color };
           data.typeNode = "database";
           break;
+        case 'report':
+          data.icon = { face: 'FontAwesome', code: '\uf201', color: data.color };
+          data.typeNode = "report";
+          break;
+        case 'cube':
+          data.icon = { face: 'FontAwesome', code: '\uf1b2', color: data.color };
+          data.typeNode = "cube";
+          break;
+        case 'excel':
+          data.icon = { face: 'FontAwesome', code: '\uf1c3', color: data.color };
+          data.typeNode = "excel";
+          break;
         case 'flux':
-          data.icon = {face: 'FontAwesome', code: '\uf085', color:data.color};
+          data.icon = { face: 'FontAwesome', code: '\uf085', color: data.color };
           data.typeNode = "flux";
           break;
         case 'application':
-          data.icon = {face: 'FontAwesome', code: '\uf108', color:data.color};
+          data.icon = { face: 'FontAwesome', code: '\uf108', color: data.color };
           data.typeNode = "application";
           break;
         default:
@@ -425,24 +439,23 @@ function showPopupEdge(data)
       }
       clearNodePopUp();
       callback(data);
-	    //refreshLabel();
+      //refreshLabel();
     }
-  
 
 
-	function refreshLabel()
-	{	alert(network.body.data.nodes._data[0].label);
-	}
+
+    function refreshLabel() {
+      alert(network.body.data.nodes._data[0].label);
+    }
 
     function editEdgeWithoutDrag(data, callback) {
       // filling in the popup DOM elements
-      
+
       var edge = network.body.data.edges._data[data.id];
       document.getElementById('edge-label').value = data.label;
       document.getElementById('edge-saveButton').onclick = saveEdgeData.bind(this, data, callback);
-      document.getElementById('edge-cancelButton').onclick = cancelEdgeEdit.bind(this,callback);
-      if (edge)
-      { 
+      document.getElementById('edge-cancelButton').onclick = cancelEdgeEdit.bind(this, callback);
+      if (edge) {
         document.getElementById('edge-comment').value = edge.comment;
       }
       document.getElementById('edge-popUp').style.display = 'block';
@@ -481,119 +494,172 @@ function showPopupEdge(data)
         alert(arrayNode[key].domaine);
       }
     }
-	
-	
-	function clusterByCid() {
-      var domaine = getNodeById(data.nodes,network.getSelectedNodes()[0]).domaine;
+
+    function colorNode() {
+      var idNode = getNodeById(data.nodes, network.getSelectedNodes()[0]).id;
+      //alert(network.body.data.nodes._data[1095].icon.color);
+      //network.body.data.nodes._data[1095].icon.color = "blue";
+      network.body.data.nodes.update({id: idNode, color: "blue"});
+    }
+
+
+    function fixPosition() {
+      var idNode = getNodeById(data.nodes, network.getSelectedNodes()[0]).id;
+      //alert(network.body.data.nodes._data[1095].icon.color);
+      //network.body.data.nodes._data[1095].icon.color = "blue";
+      network.body.data.nodes.update({id: idNode, fixed:{x:true,y:true}});
+    }
+
+    function clusterByDomaine() {
+      var domaine = getNodeById(data.nodes, network.getSelectedNodes()[0]).domaine;
+      
+      domaines.push(domaine);
+      var clusterOptionsByData;
+      for (var i = 0; i < domaines.length; i++) {
+          var domaine = domaines[i];
+          clusterOptionsByData = {
+              joinCondition: function (childOptions) {
+                  return childOptions.domaine == domaine;
+              },
+              processProperties: function (clusterOptions, childNodes, childEdges) {
+                  var totalMass = 0;
+                  for (var i = 0; i < childNodes.length; i++) {
+                      totalMass += childNodes[i].mass;
+                  }
+                  clusterOptions.mass = totalMass;
+                  return clusterOptions;
+              },
+              clusterNodeProperties: {id: 'cluster:' + domaine, borderWidth: 3, shape: 'database', color:'blue', label:domaine}
+          };
+          network.cluster(clusterOptionsByData);
+      }
+  }
+
+    function clusterByCid() {
+      var domaine = getNodeById(data.nodes, network.getSelectedNodes()[0]).domaine;
       var clusterOptionsByData = {
-          joinCondition:function(childOptions) {
-              
-              return childOptions.domaine == domaine;
-          },
-          clusterNodeProperties: {id:'cidCluster', borderWidth:3, shape:'database', name: domaine, label: domaine}
+        joinCondition: function (childOptions) {
+
+          return childOptions.domaine == domaine;
+        },
+        clusterNodeProperties: { id: 'cidCluster', borderWidth: 3, shape: 'database', name: domaine, label: domaine }
       };
       network.cluster(clusterOptionsByData);
-	}
-	
-	function setPhysics() {
-       var options = {
-       		   physics: {enabled: true }
-			}
-      network.setOptions(options);
-	}
+    }
 
-  	function disablePhysics() {
-       var options = {
-       		   physics: {enabled: false }
-			}
+    function setPhysics() {
+      var options = {
+        physics: { enabled: true }
+      }
       network.setOptions(options);
-	}
+    }
+
+    function disablePhysics() {
+      var options = {
+        physics: { enabled: false }
+      }
+      network.setOptions(options);
+    }
 
   </script>
-    <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
+  <link rel="stylesheet" href="http://maxcdn.bootstrapcdn.com/font-awesome/4.3.0/css/font-awesome.min.css">
 </head>
 
 <body onload="init();">
-<h2>Cartographie applicative</h2>
+  <h2>Cartographie applicative</h2>
 
 
 
-<div id="holder">
-	</div>
+  <div id="holder">
+  </div>
 
 
-<div id="node-popUp">
-  <span id="node-operation">node</span> <br>
-  <table style="margin:auto;">
-    <tr>
-      <td>id</td><td><input id="node-id" value="new value" /></td>
-    </tr>
-    <tr>
-      <td>label</td><td><input id="node-label" value="new value" /></td>
-    </tr>
-    <tr>
-      <td>domaine</td><td><input id="node-domaine" value="" /></td>
-    </tr>
-    <tr>
-      <td>color</td><td><input id="node-color" value="" /></td>
-    </tr>
-    <tr>
-      <td>icon</td><td>
-        <select id="node-icon">
+  <div id="node-popUp">
+    <span id="node-operation">node</span> <br>
+    <table style="margin:auto;">
+      <tr>
+        <td>id</td>
+        <td><input id="node-id" value="new value" /></td>
+      </tr>
+      <tr>
+        <td>label</td>
+        <td><input id="node-label" value="new value" /></td>
+      </tr>
+      <tr>
+        <td>domaine</td>
+        <td><input id="node-domaine" value="" /></td>
+      </tr>
+      <tr>
+        <td>color</td>
+        <td><input id="node-color" value="" /></td>
+      </tr>
+      <tr>
+        <td>icon</td>
+        <td>
+          <select id="node-icon">
             <option>person</option>
             <option>software</option>
             <option>database</option>
             <option>flux</option>
             <option>application</option>
             <option>SI externe</option>
-         </select>
-      </td>
-    </tr>
-    <tr>
-      <td>commentaire</td><td><textarea rows="2" cols="20" id="node-comment" ></textarea></td>
-    </tr>
-  </table>
-  <input type="button" value="save" id="node-saveButton" />
-  <input type="button" value="cancel" id="node-cancelButton" />
-</div>
+            <option>cube</option>
+            <option>report</option>
+            <option>excel</option>
+          </select>
+        </td>
+      </tr>
+      <tr>
+        <td>commentaire</td>
+        <td><textarea rows="2" cols="20" id="node-comment"></textarea></td>
+      </tr>
+    </table>
+    <input type="button" value="save" id="node-saveButton" />
+    <input type="button" value="cancel" id="node-cancelButton" />
+  </div>
 
-<div id="edge-popUp">
-  <span id="edge-operation">edge</span> <br>
-  <table style="margin:auto;">
-    <tr>
-      <td>label</td><td><input id="edge-label" value="new value" /></td>
-    </tr>
-    <tr>
-      <td>commentaire</td><td><textarea rows="2" cols="20" id="edge-comment" ></textarea></td>
-    </tr>
-  </table>
-  <input type="button" value="save" id="edge-saveButton" />
-  <input type="button" value="cancel" id="edge-cancelButton" />
-</div>
+  <div id="edge-popUp">
+    <span id="edge-operation">edge</span> <br>
+    <table style="margin:auto;">
+      <tr>
+        <td>label</td>
+        <td><input id="edge-label" value="new value" /></td>
+      </tr>
+      <tr>
+        <td>commentaire</td>
+        <td><textarea rows="2" cols="20" id="edge-comment"></textarea></td>
+      </tr>
+    </table>
+    <input type="button" value="save" id="edge-saveButton" />
+    <input type="button" value="cancel" id="edge-cancelButton" />
+  </div>
+  
+  <div id="mynetwork"></div>
+  <div id="menu">
+    <table>
+      <tr>
+        <td>
+          <div id="listButton">
+            <input type="button" id="myButton" value="save" onclick="save()"></input><br />
+            <input type="button" onclick="clusterByDomaine()" value="Regrouper par domaine"> </input><br />
+            <input type="button" onclick="setPhysics()" value="restore physics"> </input><br />
+            <input type="button" onclick="disablePhysics()" value="disable physics"> </input><br />
+            <input type="button" onclick="listeDomaine()" value="liste des domaines"> </input><br />
+            <input type="button" onclick="fixPosition()" value="fixer un noeud"> </input><br />
+            <input type="button" onclick="colorNode()" value="colorer noeuds"> </input><br />
+           
+            
 
-
-
-      <div id="mynetwork"></div>
-      <div id="menu">
-      <table>
-        <tr>
-          <td>
-            <div id="listButton">
-              <input type="button" id="myButton" value="save" onclick="save()"></input><br />
-              <input type="button" onclick="clusterByCid()" value="Regrouper par domaine"> </input><br />
-              <input type="button" onclick="setPhysics()" value="restore physics"> </input><br />
-              <input type="button" onclick="disablePhysics()" value="disable physics"> </input><br />
-              <input type="button" onclick="listeDomaine()" value="liste des domaines"> </input><br />
-              
-            </div>
-          </td>
-        </tr>
-        <tr>
-          <td height='300px'>
-            <div id="tooltip"><span id='contenu'></span></div>
-          </td>
-        </tr>
-      </table>
-    </div>
+          </div>
+        </td>
+      </tr>
+      <tr>
+        <td height='300px'>
+          <div id="tooltip"><span id='contenu'></span></div>
+        </td>
+      </tr>
+    </table>
+  </div>
 </body>
+
 </html>

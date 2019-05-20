@@ -74,6 +74,15 @@ session
       case 'flux':
         nodeArray[0].icon = {face: 'FontAwesome', code: "\uf085", color:nodeArray[0].color};
       break;
+      case 'report':
+        nodeArray[0].icon = { face: 'FontAwesome', code: '\uf201', color:nodeArray[0].color };
+      break;
+      case 'cube':
+        nodeArray[0].icon = { face: 'FontAwesome', code: '\uf1b2', color:nodeArray[0].color };
+      break;      
+      case 'excel':
+        nodeArray[0].icon = { face: 'FontAwesome', code: '\uf1c3', color:nodeArray[0].color };
+      break;
       case 'application':
         nodeArray[0].icon = {face: 'FontAwesome', code: "\uf108", color:nodeArray[0].color};
       break;

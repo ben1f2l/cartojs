@@ -500,8 +500,15 @@
       //alert(network.body.data.nodes._data[1095].icon.color);
       //network.body.data.nodes._data[1095].icon.color = "blue";
       network.body.data.nodes.update({id: idNode, color: "blue"});
+      network.body.data.nodes.update({id: idNode, color: "blue", icon:{color : "blue"}});
     }
 
+    function unFixPosition() {
+      var idNode = getNodeById(data.nodes, network.getSelectedNodes()[0]).id;
+      //alert(network.body.data.nodes._data[1095].icon.color);
+      //network.body.data.nodes._data[1095].icon.color = "blue";
+      network.body.data.nodes.update({id: idNode, fixed:{x:false,y:false}});
+    }
 
     function fixPosition() {
       var idNode = getNodeById(data.nodes, network.getSelectedNodes()[0]).id;
@@ -646,10 +653,9 @@
             <input type="button" onclick="disablePhysics()" value="disable physics"> </input><br />
             <input type="button" onclick="listeDomaine()" value="liste des domaines"> </input><br />
             <input type="button" onclick="fixPosition()" value="fixer un noeud"> </input><br />
+            <input type="button" onclick="unFixPosition()" value="dé-fixer un noeud"> </input><br />
             <input type="button" onclick="colorNode()" value="colorer noeuds"> </input><br />
-           
-            
-
+          
           </div>
         </td>
       </tr>

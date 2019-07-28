@@ -51,16 +51,12 @@ session
 .then(function(result) {
   console.log("récupération des nodes");
   for(var i= 0; i < result.records.length; i++)
-  { //console.log("#######   "+JSON.stringify(result.records[i]._fields[0].properties));
-    //console.log("|||||||||||||||||||     "+result.records[i]._fields[0].identity);
+  { 
     var nodeJson = JSON.stringify(result.records[i]._fields[0].properties);
     var nodeArray = [];
-    console.log("#######   "+ nodeJson);
     nodeArray = [JSON.parse(nodeJson)];
-    console.log("#######   "+ nodeArray[0].id);
     nodeArray[0].id = result.records[i]._fields[0].identity.low;
     nodeArray[0].shape = "icon";
-    console.log(nodeArray[0].color);
     switch (nodeArray[0].typeNode) {   
       case 'person':
         nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0c0", color:nodeArray[0].color};
@@ -92,7 +88,6 @@ session
       default:
         nodeArray[0].icon = {face: 'FontAwesome', code: "\uf0ac", color:nodeArray[0].color};
     }
-    //console.log("#######   "+ JSON.stringify(nodeArray));
     nodes.push(nodeArray[0]);
     console.log(nodes.length);
   }
@@ -106,12 +101,12 @@ session
   });
 }
 
-// fonction qui récupère les noeuds et leurs propriétés
+// fonction qui récupère les liens et leurs propriétés
 function getEdge(callback)
 {
 var edges = [];
 session
-.run("MATCH (Application)<-[r]-(:Application) return r")
+.run("MATCH ()<-[r]-() return r")
 .then(function(result) {
   console.log("récupération des liens");
   console.log(JSON.stringify(result.records, null, 3));

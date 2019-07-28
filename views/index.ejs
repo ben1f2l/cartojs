@@ -253,7 +253,8 @@
           }
         },
         "interaction": {
-          "hover": true
+          "hover": true,
+          "multiselect": true
         },
         "physics": {
           "barnesHut": {
@@ -554,6 +555,29 @@
       network.cluster(clusterOptionsByData);
     }
 
+
+    function guid() {
+  function s4() {
+    return Math.floor((1 + Math.random()) * 0x10000)
+      .toString(16)
+      .substring(1);
+  }
+  return s4() + s4() + '-' + s4() + '-' + s4() + '-' +
+    s4() + '-' + s4() + s4() + s4();
+}
+
+    function clusterBySelection() {
+      
+      var clusterOptionsByData = {
+        joinCondition: function (childOptions) {
+          
+          return network.getSelectedNodes().includes(childOptions.id);
+        },
+        clusterNodeProperties: { id: guid(), borderWidth: 3, shape: 'database', name: 'selection', label: 'selection' }
+      };
+      network.cluster(clusterOptionsByData);
+    }
+
     function setPhysics() {
       var options = {
         physics: { enabled: true }
@@ -655,7 +679,7 @@
             <input type="button" onclick="fixPosition()" value="fixer un noeud"> </input><br />
             <input type="button" onclick="unFixPosition()" value="dé-fixer un noeud"> </input><br />
             <input type="button" onclick="colorNode()" value="colorer noeuds"> </input><br />
-          
+            <input type="button" onclick="clusterBySelection()" value="regrouper sélection"> </input><br />
           </div>
         </td>
       </tr>
